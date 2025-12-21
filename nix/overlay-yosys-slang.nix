@@ -1,6 +1,5 @@
 # Temporary overlay until yosys-slang lands in nixpkgs
 # https://github.com/NixOS/nixpkgs/pull/472800
-{ pkgs }:
 
 final: prev: {
   yosys-slang = prev.stdenv.mkDerivation rec {

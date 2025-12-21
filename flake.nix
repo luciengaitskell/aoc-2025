@@ -8,26 +8,35 @@
   outputs =
     { self, nixpkgs, ... }:
     let
-      # Portable: works on any system automatically
-      pkgs = import nixpkgs {
-        system = pkgs.system;
-        overlays = [
-          (import ./nix/overlay-yosys-slang.nix nixpkgs.legacyPackages.${pkgs.system})
-        ];
-      };
+      forAllSystems =
+        f:
+        nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ] (
+          system: f system
+        );
     in
     {
-      devShells.${pkgs.system}.default = pkgs.mkShell {
-        buildInputs = with pkgs; [
-          uv
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ (import ./nix/overlay-yosys-slang.nix) ];
+          };
+        in
+        {
+          default = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              uv
 
-          # simulation
-          verilator
+              # simulation
+              verilator
 
-          # synthesis
-          yosys
-          yosys-slang
-        ];
-      };
+              # synthesis
+              yosys
+              yosys-slang
+            ];
+          };
+        }
+      );
     };
 }
