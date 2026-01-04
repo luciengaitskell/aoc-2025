@@ -1,6 +1,6 @@
 from days.lib.input import to_digits, to_int, load_input
 
-def num_palindromes_n_digits_between(start: int, end: int):
+def num_invalid_ids_n_digits_between(start: int, end: int):
     assert start <= end
 
     digits_start = to_digits(start)
@@ -20,7 +20,7 @@ def num_palindromes_n_digits_between(start: int, end: int):
     return count
 
 
-def palindromic_n_digits(start: list[int] | None, end: list[int] | None):
+def invalid_ids_n_digits(start: list[int] | None, end: list[int] | None):
     assert start is None or end is None or len(start) == len(end)
     assert start is not None or end is not None
 
@@ -40,12 +40,12 @@ def palindromic_n_digits(start: list[int] | None, end: list[int] | None):
     start_int = to_int(start)
     end_int = to_int(end)
 
-    total = num_palindromes_n_digits_between(start_int, end_int)
-    print(f"Total palindromes between {start_int}-{end_int}: {total}")
+    total = num_invalid_ids_n_digits_between(start_int, end_int)
+    print(f"Total invalid IDs between {start_int}-{end_int}: {total}")
     return total
 
 
-def find_palindromes(start: int, end: int):
+def find_invalid_ids(start: int, end: int):
     assert start <= end
 
     start_digits = to_digits(start)
@@ -67,16 +67,16 @@ def find_palindromes(start: int, end: int):
         else:
             e_digits = None
 
-        count += palindromic_n_digits(s_digits, e_digits)
+        count += invalid_ids_n_digits(s_digits, e_digits)
 
     return count
 
 
 if __name__ == "__main__":
-    # print(find_palindromes(1188511880, 1188511890))
-    # print(palindromic_n_digits(to_digits(565653), to_digits(565659)))
+    # print(find_invalid_ids(1188511880, 1188511890))
+    # print(invalid_ids_n_digits(to_digits(565653), to_digits(565659)))
     # dig = to_digits(100001)
-    # print(palindromic_n_digits(dig, dig))
+    # print(invalid_ids_n_digits(dig, dig))
     # 3*3 + 1*10*10
     # 8*8 + 7*10*10
 
@@ -89,6 +89,6 @@ if __name__ == "__main__":
         start_s, end_s = r.split("-")
         start = int(start_s)
         end = int(end_s)
-        total += (result := find_palindromes(start, end))
+        total += (result := find_invalid_ids(start, end))
 
-    print(f"Total palindromic numbers in all ranges: {total}")
+    print(f"Total invalid IDs in all ranges: {total}")
