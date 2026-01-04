@@ -1,38 +1,21 @@
 from days.lib.input import to_digits, to_int, load_input
 
+def num_palindromes_n_digits_between(start: int, end: int):
+    assert start <= end
 
-def num_palindromes_n_digits(digit_count: int):
-    assert digit_count % 2 == 0
-    half = digit_count // 2
-    return 9 * (10 ** (half - 1))  # First digit can't be zero
-
-
-def num_palindromes_n_digits_before(start: int):
-    digits = to_digits(start)
-    N = len(digits)
-    assert N >= 2
+    digits_start = to_digits(start)
+    digits_end = to_digits(end)
+    N = len(digits_start)
+    assert N == len(digits_end)
     assert N % 2 == 0
 
     half = N // 2
 
-    count = to_int(digits[:half]) - to_int([1] + [0] * (half - 1))
-    if to_int(digits[:half]) < to_int(digits[half:]):
-        count += 1
-
-    return count
-
-
-def num_palindromes_n_digits_above(end: int):
-    digits = to_digits(end)
-    N = len(digits)
-    assert N >= 2
-    assert N % 2 == 0
-
-    half = N // 2
-
-    count = to_int([9] * half) + 1 - to_int(digits[:half])
-    if to_int(digits[:half]) <= to_int(digits[half:]):
+    count = to_int(digits_end[:half]) - to_int(digits_start[:half])
+    if to_int(digits_end[:half]) > to_int(digits_end[half:]):
         count -= 1
+    if to_int(digits_start[:half]) >= to_int(digits_start[half:]):
+        count += 1
 
     return count
 
@@ -49,13 +32,17 @@ def palindromic_n_digits(start: list[int] | None, end: list[int] | None):
         raise ValueError("Either start or end must be provided")
     assert N % 2 == 0
 
-    total = num_palindromes_n_digits(N)
-    before = num_palindromes_n_digits_before(to_int(start)) if start else 0
-    above = num_palindromes_n_digits_above(to_int(end)) if end else 0
-    print(
-        f"Total palindromes with {N} digits: {total}, before: {before}, above: {above}"
-    )
-    return total - before - above
+    if start is None:
+        start = [1] + [0] * (N - 1)
+    if end is None:
+        end = [9] * N
+
+    start_int = to_int(start)
+    end_int = to_int(end)
+
+    total = num_palindromes_n_digits_between(start_int, end_int)
+    print(f"Total palindromes between {start_int}-{end_int}: {total}")
+    return total
 
 
 def find_palindromes(start: int, end: int):
@@ -103,6 +90,5 @@ if __name__ == "__main__":
         start = int(start_s)
         end = int(end_s)
         total += (result := find_palindromes(start, end))
-        print(f"Range {start}-{end} has {result} palindromic numbers")
 
     print(f"Total palindromic numbers in all ranges: {total}")
