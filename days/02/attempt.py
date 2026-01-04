@@ -93,13 +93,6 @@ def find_invalid_ids(start: int, end: int):
 
 
 if __name__ == "__main__":
-    # print(find_invalid_ids(1188511880, 1188511890))
-    # print(invalid_ids_n_digits(to_digits(565653), to_digits(565659)))
-    # dig = to_digits(100001)
-    # print(invalid_ids_n_digits(dig, dig))
-    # 3*3 + 1*10*10
-    # 8*8 + 7*10*10
-
     input_data = load_input(__file__)
     data_line = next(iter(input_data))
     ranges = data_line.split(",")
