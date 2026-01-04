@@ -19,9 +19,7 @@ def num_invalid_ids_n_digits_between(start: int, end: int):
 
     start_range = to_int(digits_start[:half])
     end_range = to_int(digits_end[:half])
-    print(f"range of {start_range} to {end_range} for first half digits")
     range_sum = fast_sum_in_range(start_range, end_range)
-    print("Initial range sum:", range_sum)
 
     count = end_range - start_range
     if end_range > to_int(digits_end[half:]):
