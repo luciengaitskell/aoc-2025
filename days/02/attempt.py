@@ -1,5 +1,11 @@
 from days.lib.input import to_digits, to_int, load_input
 
+def fast_sum_in_range(start: int, end: int) -> int:
+    assert start <= end
+    n = end - start + 1
+    return n * (start + end) // 2
+
+
 def num_invalid_ids_n_digits_between(start: int, end: int):
     assert start <= end
 
@@ -11,13 +17,24 @@ def num_invalid_ids_n_digits_between(start: int, end: int):
 
     half = N // 2
 
-    count = to_int(digits_end[:half]) - to_int(digits_start[:half])
-    if to_int(digits_end[:half]) > to_int(digits_end[half:]):
-        count -= 1
-    if to_int(digits_start[:half]) >= to_int(digits_start[half:]):
-        count += 1
+    start_range = to_int(digits_start[:half])
+    end_range = to_int(digits_end[:half])
+    print(f"range of {start_range} to {end_range} for first half digits")
+    range_sum = fast_sum_in_range(start_range, end_range)
+    print("Initial range sum:", range_sum)
 
-    return count
+    count = end_range - start_range
+    if end_range > to_int(digits_end[half:]):
+        range_sum -= end_range
+        count -= 1
+    if start_range >= to_int(digits_start[half:]):
+        count += 1
+    else:
+        range_sum -= start_range
+
+    full_sum = range_sum + (range_sum * (10**half))
+
+    return count, full_sum
 
 
 def invalid_ids_n_digits(start: list[int] | None, end: list[int] | None):
@@ -40,9 +57,11 @@ def invalid_ids_n_digits(start: list[int] | None, end: list[int] | None):
     start_int = to_int(start)
     end_int = to_int(end)
 
-    total = num_invalid_ids_n_digits_between(start_int, end_int)
-    print(f"Total invalid IDs between {start_int}-{end_int}: {total}")
-    return total
+    total_count, total_sum = num_invalid_ids_n_digits_between(start_int, end_int)
+    print(
+        f"Total invalid IDs between {start_int}-{end_int}: {total_count}, Sum: {total_sum}"
+    )
+    return total_count, total_sum
 
 
 def find_invalid_ids(start: int, end: int):
@@ -51,7 +70,8 @@ def find_invalid_ids(start: int, end: int):
     start_digits = to_digits(start)
     end_digits = to_digits(end)
 
-    count = 0
+    total_count = 0
+    total_sum = 0
 
     for digit_count in range(len(start_digits), len(end_digits) + 1):
         if digit_count % 2 != 0:
@@ -67,9 +87,11 @@ def find_invalid_ids(start: int, end: int):
         else:
             e_digits = None
 
-        count += invalid_ids_n_digits(s_digits, e_digits)
+        new_count, new_sum = invalid_ids_n_digits(s_digits, e_digits)
+        total_count += new_count
+        total_sum += new_sum
 
-    return count
+    return total_count, total_sum
 
 
 if __name__ == "__main__":
@@ -89,6 +111,6 @@ if __name__ == "__main__":
         start_s, end_s = r.split("-")
         start = int(start_s)
         end = int(end_s)
-        total += (result := find_invalid_ids(start, end))
+        total += (result := find_invalid_ids(start, end)[1])
 
-    print(f"Total invalid IDs in all ranges: {total}")
+    print(f"Sum of invalid IDs in all ranges: {total}")
