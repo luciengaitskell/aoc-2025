@@ -9,8 +9,8 @@ final: prev: {
     src = prev.fetchFromGitHub {
       owner = "povik";
       repo = "yosys-slang";
-      rev = "c23e0653c85f6ed4127e665a2529b069ce550e967";
-      hash = "sha256-7axr4JyxTtnCbI6l23A9LoBco3b3bqEMKoTEc1KNOQI=";
+      rev = "64b44616a3798f07453b14ea03e4ac8a16b77313";
+      hash = "sha256-kfu59/M3+IM+5ZMd+Oy4IZf4JWuVtPDlkHprk0FB8t4=";
       fetchSubmodules = true;
     };
 
