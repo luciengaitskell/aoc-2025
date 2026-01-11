@@ -12,6 +12,14 @@ build: [
 depends: [
   "ocaml" {>= "5.1.0"}
   "dune" {>= "3.17.0"}
+  "hardcaml"
+  "hardcaml_waveterm"
+  "ppx_hardcaml"
+  "core"
+  "core_unix"
+  "ppx_jane"
+  "jane_rope"
+  "re"
 ]
 available: arch != "arm32" & arch != "x86_32"
 synopsis: "Advent of Code 2025 approaches"
