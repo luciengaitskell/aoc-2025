@@ -1,12 +1,22 @@
 {
-  description = "SystemVerilog project with Yosys + yosys-slang + Verilator + SiliconCompiler + uv";
+  description = "Hardcaml + SystemVerilog project";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    opam-nix = {
+      url = "github:tweag/opam-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    { self, nixpkgs, ... }:
+    {
+      self,
+      nixpkgs,
+      opam-nix,
+      ...
+    }:
     let
       forAllSystems =
         f:
@@ -22,9 +32,21 @@
             inherit system;
             overlays = [ (import ./nix/overlay-yosys-slang.nix) ];
           };
+
+          on = opam-nix.lib.${system};
+
+          projectName = "aoc2025";
+
+          # build the OCaml project scope based on the .opam file
+          devPackages = on.buildOpamProject { } projectName ./. {
+            # ocaml-base-compiler = "*";
+          };
         in
         {
           default = pkgs.mkShell {
+            # pull in OCaml and dependencies from .opam file
+            inputsFrom = [ devPackages.${projectName} ];
+
             buildInputs = with pkgs; [
               uv
 
