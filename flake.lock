@@ -146,10 +146,27 @@
         "type": "github"
       }
     },
+    "oxcaml-repository": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1766178166,
+        "narHash": "sha256-eud6+6afUJydw4LFYAeDrJIgwaTrpk0+mDa+b89rHok=",
+        "owner": "oxcaml",
+        "repo": "opam-repository",
+        "rev": "535c466c935bb7076ff517e425cd08f8b2f6a356",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxcaml",
+        "repo": "opam-repository",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
-        "opam-nix": "opam-nix"
+        "opam-nix": "opam-nix",
+        "oxcaml-repository": "oxcaml-repository"
       }
     },
     "systems": {

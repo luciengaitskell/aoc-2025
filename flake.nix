@@ -8,6 +8,11 @@
       url = "github:tweag/opam-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    oxcaml-repository = {
+      url = "github:oxcaml/opam-repository";
+      flake = false;
+    };
   };
 
   outputs =
@@ -15,6 +20,7 @@
       self,
       nixpkgs,
       opam-nix,
+      oxcaml-repository,
       ...
     }:
     let
@@ -38,9 +44,41 @@
           projectName = "aoc2025";
 
           # build the OCaml project scope based on the .opam file
-          devPackages = on.buildOpamProject { } projectName ./. {
-            # ocaml-base-compiler = "*";
+          scope =
+            on.buildOpamProject
+              {
+                repos = [
+                  oxcaml-repository
+                  on.opamRepository
+                ];
+
+                resolveArgs = {
+                  with-test = true;
+                };
+              }
+              projectName
+              ./.
+              {
+                ocaml-variants = "5.2.0+ox";
+                ocaml = "5.2.0";
+              };
+
+          overlay = final: prev: {
+            ocaml-variants = prev.ocaml-variants.overrideAttrs (old: {
+              nativeBuildInputs =
+                (old.nativeBuildInputs or [ ])
+                ++ [
+                  pkgs.rsync # fix for install phase
+                ]
+                ++ (
+                  # https://github.com/tweag/opam-nix/issues/146
+                  # fix for macOS build
+                  if pkgs.stdenv.isDarwin then [ pkgs.darwin.cctools ] else [ ]
+                );
+            });
           };
+
+          devPackages = scope.overrideScope overlay;
         in
         {
           default = pkgs.mkShell {

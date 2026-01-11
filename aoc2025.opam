@@ -13,12 +13,13 @@ depends: [
   "ocaml" {>= "5.1.0"}
   "dune" {>= "3.17.0"}
   "hardcaml"
+  "hardcaml_test_harness"
   "hardcaml_waveterm"
   "ppx_hardcaml"
   "core"
   "core_unix"
   "ppx_jane"
-  "jane_rope"
+  "rope"
   "re"
 ]
 available: arch != "arm32" & arch != "x86_32"
