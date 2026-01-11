@@ -3,3 +3,8 @@ __pycache__/
 *$py.class
 
 *.so
+
+_build
+*.install
+*.merlin
+_opam
