@@ -60,7 +60,6 @@
               ./.
               {
                 ocaml-variants = "5.2.0+ox";
-                ocaml = "5.2.0";
               };
 
           overlay = final: prev: {
