@@ -21,6 +21,10 @@ depends: [
   "ppx_jane"
   "rope"
   "re"
+
+  # Developer tools
+  "ocaml-lsp-server" {dev}
+  "ocamlformat" {dev}
 ]
 available: arch != "arm32" & arch != "x86_32"
 synopsis: "Advent of Code 2025 approaches"

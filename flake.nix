@@ -43,11 +43,6 @@
 
           projectName = "aoc2025";
 
-          devScope = on.queryToScope { } {
-            ocaml-base-compiler = "5.2.0";
-            ocaml-lsp-server = "*";
-            ocamlformat = "*";
-          };
           # build the OCaml project scope based on the .opam file
           scope =
             on.buildOpamProject
@@ -58,7 +53,7 @@
                 ];
 
                 resolveArgs = {
-                  with-test = true;
+                  dev = true;
                 };
               }
               projectName
@@ -100,8 +95,8 @@
               yosys-slang
 
               # ocaml dev tools
-              devScope.ocaml-lsp-server
-              devScope.ocamlformat
+              devPackages.ocaml-lsp-server
+              devPackages.ocamlformat
             ];
           };
         }
