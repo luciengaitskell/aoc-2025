@@ -59,6 +59,8 @@
               projectName
               ./.
               {
+                ocaml-lsp-server = "*";
+                ocamlformat = "*";
                 ocaml-variants = "5.2.0+ox";
               };
 
