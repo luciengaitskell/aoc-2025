@@ -42,26 +42,38 @@
           on = opam-nix.lib.${system};
 
           projectName = "aoc2025";
+          ocaml-variant = "5.2.0+ox";
+          opam-repositories = [
+            oxcaml-repository
+            on.opamRepository
+          ];
 
           # build the OCaml project scope based on the .opam file
           scope =
             on.buildOpamProject
               {
-                repos = [
-                  oxcaml-repository
-                  on.opamRepository
-                ];
+                repos = opam-repositories;
 
                 resolveArgs = {
+                  with-test = true;
                   dev = true;
                 };
               }
               projectName
               ./.
               {
+                ocaml-variants = ocaml-variant;
+              };
+
+          toolScope =
+            on.queryToScope
+              {
+                repos = opam-repositories;
+              }
+              {
                 ocaml-lsp-server = "*";
                 ocamlformat = "*";
-                ocaml-variants = "5.2.0+ox";
+                ocaml-variants = ocaml-variant;
               };
 
           overlay = final: prev: {
@@ -79,12 +91,13 @@
             });
           };
 
-          devPackages = scope.overrideScope overlay;
+          projectPackages = scope.overrideScope overlay;
+          toolPackages = toolScope.overrideScope overlay;
         in
         {
           default = pkgs.mkShell {
             # pull in OCaml and dependencies from .opam file
-            inputsFrom = [ devPackages.${projectName} ];
+            inputsFrom = [ projectPackages.${projectName} ];
 
             buildInputs = with pkgs; [
               uv
@@ -97,8 +110,8 @@
               yosys-slang
 
               # ocaml dev tools
-              devPackages.ocaml-lsp-server
-              devPackages.ocamlformat
+              toolPackages.ocaml-lsp-server
+              toolPackages.ocamlformat
             ];
           };
         }
