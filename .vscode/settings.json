@@ -1,4 +1,7 @@
 {
   "nixEnvSelector.nixFile": "${workspaceFolder}/flake.nix",
   "nixEnvSelector.useFlakes": true,
+  "ocaml.sandbox": {
+    "kind": "global"
+  }
 }
