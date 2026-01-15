@@ -1,7 +1,6 @@
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, RisingEdge, FallingEdge, ReadOnly
-import numpy as np
+from cocotb.triggers import ClockCycles, RisingEdge, ReadOnly
 from sim.lib import build_and_run_sim, reset
 
 
