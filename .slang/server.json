@@ -1,4 +1,4 @@
 {
   "flags": "-f config/hdl.f",
-  "indexGlobs": ["./hdl/**/*.sv", "./days/**/*.sv"]
+  "indexGlobs": ["./hdl/.../*.sv", "./days/**/*.sv"]
 }
