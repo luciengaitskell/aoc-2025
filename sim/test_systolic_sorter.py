@@ -4,6 +4,9 @@ from cocotb.triggers import ClockCycles, RisingEdge, ReadOnly
 from sim.lib import build_and_run_sim, reset
 
 
+NUM_ELEMENTS = 10
+
+
 @cocotb.test
 async def test_a(dut):
     test_data = [15, 15, 15, 15, 14, 11, 8, 9, 10, 8, 8, 6, 4, 2, 0, 2, 1, 3, 5, 7, 9]
@@ -21,7 +24,8 @@ async def test_a(dut):
 
     await RisingEdge(dut.out_last)
 
-    for i, val in enumerate(sorted(test_data)):
+    sorted_data = sorted(test_data)[:NUM_ELEMENTS]
+    for i, val in enumerate(sorted_data):
         dut.out_address.value = i
         await ReadOnly()
         output_value = dut.out_data.value.to_unsigned()
@@ -31,6 +35,12 @@ async def test_a(dut):
         )
         await ClockCycles(dut.clk, 1)
 
+    assert dut.largest_valid.value == 1, "Expected largest_valid to be 1"
+    assert dut.largest.value == sorted_data[-1], (
+        f"Expected largest value to be {sorted_data[-1]},"
+        f" but got {dut.largest.value.to_unsigned()}"
+    )
+
 
 if __name__ == "__main__":
     build_and_run_sim(
@@ -38,5 +48,6 @@ if __name__ == "__main__":
         hdl_toplevel="systolic_sorter",
         parameters={
             "BIT_WIDTH": 32,
+            "ELEMENTS": NUM_ELEMENTS,
         },
     )

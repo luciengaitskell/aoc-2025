@@ -18,6 +18,8 @@ module systolic_sorter #(
     input logic [BIT_WIDTH-1:0] in_data,
     input METADATA_TYPE in_metadata,
     input logic in_last,
+    output logic largest_valid,
+    output logic [BIT_WIDTH-1:0] largest,
     output logic out_last,
     input logic [ADDRESS_WIDTH-1:0] out_address,
     output logic out_valid,
@@ -42,6 +44,11 @@ module systolic_sorter #(
     assign array_data_moving[0] = in_data;
     assign array_metadata_moving[0] = in_metadata;
     assign last_moving[0] = in_last;
+  end
+
+  always_comb begin : largestAssign
+    largest_valid = array_valid[ELEMENTS-1];
+    largest = array_data[ELEMENTS-1];
   end
 
   always_ff @(posedge clk) begin : lastLatch
