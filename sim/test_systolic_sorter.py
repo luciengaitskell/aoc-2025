@@ -4,10 +4,6 @@ from cocotb.triggers import ClockCycles, RisingEdge, ReadOnly
 from sim.lib import build_and_run_sim, reset
 
 
-NUM_ITER = 150
-C_S00_AXIS_TDATA_WIDTH = 32
-
-
 @cocotb.test
 async def test_a(dut):
     test_data = [15, 15, 15, 15, 14, 11, 8, 9, 10, 8, 8, 6, 4, 2, 0, 2, 1, 3, 5, 7, 9]
