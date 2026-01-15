@@ -28,14 +28,13 @@ async def test_a(dut):
 
     for i, val in enumerate(sorted(test_data)):
         dut.out_address.value = i
-        await RisingEdge(dut.clk)
         await ReadOnly()
         output_value = dut.out_data.value.to_unsigned()
         # print(f"Got output value: {output_value}, expected {val}")
         assert output_value == val, (
             f"at index {i}, expected {val} but got {output_value}"
         )
-        await FallingEdge(dut.clk)
+        await ClockCycles(dut.clk, 1)
 
 
 if __name__ == "__main__":

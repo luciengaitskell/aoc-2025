@@ -92,9 +92,9 @@ module systolic_sorter #(
     end
   end
 
-  always_ff @(posedge clk) begin : outputSelect
-    out_valid <= array_valid[out_address];
-    out_data <= array_data[out_address];
-    out_metadata <= array_metadata[out_address];
+  always_comb begin : outputSelect
+    out_valid = array_valid[out_address];
+    out_data = array_data[out_address];
+    out_metadata = array_metadata[out_address];
   end
 endmodule
