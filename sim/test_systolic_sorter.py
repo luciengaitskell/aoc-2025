@@ -19,7 +19,14 @@ async def test_a(dut):
         # dut.in_metadata.value = i
         dut.in_valid.value = 1
         dut.in_last.value = int(i == len(test_data) - 1)
+
+        # need to wait for value to propagate through
+        expected_largest_valid = 1 if i >= NUM_ELEMENTS + NUM_ELEMENTS - 1 else 0
         await ClockCycles(dut.clk, 1)
+        assert dut.largest_valid.value == expected_largest_valid, (
+            f"After inputting {i} elements, expected largest_valid to be"
+            f" {expected_largest_valid}, but got {dut.largest_valid.value}"
+        )
     dut.in_valid.value = 0
 
     await RisingEdge(dut.out_last)
