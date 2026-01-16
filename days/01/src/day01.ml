@@ -89,5 +89,5 @@ let create scope ({ clock; clear; start; finish; data_in; data_in_valid } : _ I.
    waveforms and (optionally) the generated RTL. *)
 let hierarchical scope =
   let module Scoped = Hierarchy.In_scope (I) (O) in
-  Scoped.hierarchical ~scope ~name:"range_finder" create
+  Scoped.hierarchical ~scope ~name:"day01" create
 ;;

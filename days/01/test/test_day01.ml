@@ -2,8 +2,8 @@ open! Core
 open! Hardcaml
 open! Hardcaml_waveterm
 open! Hardcaml_test_harness
-module Range_finder = Aoc2025_day01.Range_finder
-module Harness = Cyclesim_harness.Make (Range_finder.I) (Range_finder.O)
+module Day01 = Aoc2025_day01.Day01
+module Harness = Cyclesim_harness.Make (Day01.I) (Day01.O)
 
 let ( <--. ) = Bits.( <--. )
 let sample_input_values = [ 16; 67; 150; 4 ]
@@ -61,7 +61,7 @@ let waves_config = Waves_config.no_waves
 (* ;; *)
 
 let%expect_test "Simple test, optionally saving waveforms to disk" =
-  Harness.run_advanced ~waves_config ~create:Range_finder.hierarchical simple_testbench;
+  Harness.run_advanced ~waves_config ~create:Day01.hierarchical simple_testbench;
   [%expect {| (Result (range 146)) |}]
 ;;
 
@@ -73,11 +73,11 @@ let%expect_test "Simple test with printing waveforms directly" =
   let display_rules =
     [ Display_rule.port_name_matches
         ~wave_format:(Bit_or Unsigned_int)
-        (Re.Glob.glob "range_finder*" |> Re.compile)
+        (Re.Glob.glob "day01*" |> Re.compile)
     ]
   in
   Harness.run_advanced
-    ~create:Range_finder.hierarchical
+    ~create:Day01.hierarchical
     ~trace:`All_named
     ~print_waves_after_test:(fun waves ->
       Waveform.print
@@ -94,29 +94,29 @@ let%expect_test "Simple test with printing waveforms directly" =
     {|
     (Result (range 146))
     ┌Signals─────────────────────┐┌Waves───────────────────────────────────────────────────────┐
-    │range_finder$i$clear        ││────┐                                                       │
+    │day01$i$clear        ││────┐                                                       │
     │                            ││    └───────────────────────────────────────────────────────│
-    │range_finder$i$clock        ││┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ │
+    │day01$i$clock        ││┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ │
     │                            ││  └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └─│
     │                            ││────────────┬───────┬───────┬───────┬───────────────────────│
-    │range_finder$i$data_in      ││ 0          │16     │67     │150    │4                      │
+    │day01$i$data_in      ││ 0          │16     │67     │150    │4                      │
     │                            ││────────────┴───────┴───────┴───────┴───────────────────────│
-    │range_finder$i$data_in_valid││            ┌───┐   ┌───┐   ┌───┐   ┌───┐                   │
+    │day01$i$data_in_valid││            ┌───┐   ┌───┐   ┌───┐   ┌───┐                   │
     │                            ││────────────┘   └───┘   └───┘   └───┘   └───────────────────│
-    │range_finder$i$finish       ││                                            ┌───┐           │
+    │day01$i$finish       ││                                            ┌───┐           │
     │                            ││────────────────────────────────────────────┘   └───────────│
-    │range_finder$i$start        ││        ┌───┐                                               │
+    │day01$i$start        ││        ┌───┐                                               │
     │                            ││────────┘   └───────────────────────────────────────────────│
     │                            ││────────────────┬───────┬───────┬───────────────────────────│
-    │range_finder$max            ││ 0              │16     │67     │150                        │
+    │day01$max            ││ 0              │16     │67     │150                        │
     │                            ││────────────────┴───────┴───────┴───────────────────────────│
     │                            ││────────────┬───┬───────────────────────┬───────────────────│
-    │range_finder$min            ││ 0          │65.│16                     │4                  │
+    │day01$min            ││ 0          │65.│16                     │4                  │
     │                            ││────────────┴───┴───────────────────────┴───────────────────│
-    │range_finder$o$range$valid  ││                                                ┌───────────│
+    │day01$o$range$valid  ││                                                ┌───────────│
     │                            ││────────────────────────────────────────────────┘           │
     │                            ││────────────────────────────────────────────────┬───────────│
-    │range_finder$o$range$value  ││ 0                                              │146        │
+    │day01$o$range$value  ││ 0                                              │146        │
     │                            ││────────────────────────────────────────────────┴───────────│
     └────────────────────────────┘└────────────────────────────────────────────────────────────┘
     |}]

@@ -2,10 +2,10 @@ open! Core
 open! Hardcaml
 open! Aoc2025_day01
 
-let generate_range_finder_rtl () =
-  let module C = Circuit.With_interface (Range_finder.I) (Range_finder.O) in
+let generate_day01_rtl () =
+  let module C = Circuit.With_interface (Day01.I) (Day01.O) in
   let scope = Scope.create ~auto_label_hierarchical_ports:true () in
-  let circuit = C.create_exn ~name:"range_finder_top" (Range_finder.hierarchical scope) in
+  let circuit = C.create_exn ~name:"day01_top" (Day01.hierarchical scope) in
   let rtl_circuits =
     Rtl.create ~database:(Scope.circuit_database scope) Verilog [ circuit ]
   in
@@ -13,15 +13,15 @@ let generate_range_finder_rtl () =
   print_endline rtl
 ;;
 
-let range_finder_rtl_command =
+let day01_rtl_command =
   Command.basic
     ~summary:""
     [%map_open.Command
       let () = return () in
-      fun () -> generate_range_finder_rtl ()]
+      fun () -> generate_day01_rtl ()]
 ;;
 
 let () =
   Command_unix.run
-    (Command.group ~summary:"" [ "range-finder", range_finder_rtl_command ])
+    (Command.group ~summary:"" [ "range-finder", day01_rtl_command ])
 ;;
