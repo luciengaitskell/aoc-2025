@@ -1,6 +1,6 @@
 open! Core
 open! Hardcaml
-open! Aoc2025
+open! Aoc2025_day01
 
 let generate_range_finder_rtl () =
   let module C = Circuit.With_interface (Range_finder.I) (Range_finder.O) in

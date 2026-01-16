@@ -7,7 +7,7 @@
   core
   core_unix
   hardcaml
-  aoc2025
+  aoc2025_day01
   jane_rope)
  (preprocess
   (pps ppx_jane))
