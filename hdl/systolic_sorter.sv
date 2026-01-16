@@ -9,8 +9,7 @@ typedef struct packed {
 module systolic_sorter #(
     parameter int ELEMENTS = 64,
     parameter int BIT_WIDTH = 32,
-    parameter type METADATA_TYPE = id_pair_s,
-    localparam int ADDRESS_WIDTH = $clog2(ELEMENTS)
+    parameter type METADATA_TYPE = id_pair_s
 ) (
     input logic clk,
     input logic rst,
@@ -20,12 +19,18 @@ module systolic_sorter #(
     input logic in_last,
     output logic largest_valid,
     output logic [BIT_WIDTH-1:0] largest,
+    input logic out_ready,
     output logic out_last,
-    input logic [ADDRESS_WIDTH-1:0] out_address,
     output logic out_valid,
     output logic [BIT_WIDTH-1:0] out_data,
     output METADATA_TYPE out_metadata
 );
+
+  enum logic [0:0] {
+    RUN,
+    SHIFTOUT
+  } state;
+
 
   logic array_valid[0:ELEMENTS-1];
   logic [BIT_WIDTH-1:0] array_data[0:ELEMENTS-1];
@@ -65,43 +70,64 @@ module systolic_sorter #(
       for (int i = 0; i < ELEMENTS; i++) begin
         array_valid[i] <= 1'b0;
       end
+      state <= RUN;
     end else begin
-      for (int i = 0; i < ELEMENTS; i++) begin
-        last_moving[i+1] <= last_moving[i];
-        if (!array_valid[i]) begin
-          array_valid[i] <= array_valid_moving[i];
-          array_data[i] <= array_data_moving[i];
-          array_metadata[i] <= array_metadata_moving[i];
-
-          array_valid_moving[i+1] <= 1'b0;  // consumed
-        end else if (!array_valid_moving[i]) begin
-          // propagate invalid
-          array_valid_moving[i+1] <= array_valid_moving[i];
-        end else begin
-          // compare and swap
-          if (array_data_moving[i] < array_data[i]) begin
-            // moving value is smaller, swap
-            array_valid_moving[i+1] <= array_valid[i];
-            array_data_moving[i+1] <= array_data[i];
-            array_metadata_moving[i+1] <= array_metadata[i];
-
-            array_valid[i] <= array_valid_moving[i];
-            array_data[i] <= array_data_moving[i];
-            array_metadata[i] <= array_metadata_moving[i];
+      case (state)
+        RUN: begin
+          if (out_last) begin
+            state <= SHIFTOUT;
           end else begin
-            // current value is smaller, propagate moving
-            array_valid_moving[i+1] <= array_valid_moving[i];
-            array_data_moving[i+1] <= array_data_moving[i];
-            array_metadata_moving[i+1] <= array_metadata_moving[i];
+            for (int i = 0; i < ELEMENTS; i++) begin
+              last_moving[i+1] <= last_moving[i];
+              if (!array_valid[i]) begin
+                array_valid[i] <= array_valid_moving[i];
+                array_data[i] <= array_data_moving[i];
+                array_metadata[i] <= array_metadata_moving[i];
+
+                array_valid_moving[i+1] <= 1'b0;  // consumed
+              end else if (!array_valid_moving[i]) begin
+                // propagate invalid
+                array_valid_moving[i+1] <= array_valid_moving[i];
+              end else begin
+                // compare and swap
+                if (array_data_moving[i] < array_data[i]) begin
+                  // moving value is smaller, swap
+                  array_valid_moving[i+1] <= array_valid[i];
+                  array_data_moving[i+1] <= array_data[i];
+                  array_metadata_moving[i+1] <= array_metadata[i];
+
+                  array_valid[i] <= array_valid_moving[i];
+                  array_data[i] <= array_data_moving[i];
+                  array_metadata[i] <= array_metadata_moving[i];
+                end else begin
+                  // current value is smaller, propagate moving
+                  array_valid_moving[i+1] <= array_valid_moving[i];
+                  array_data_moving[i+1] <= array_data_moving[i];
+                  array_metadata_moving[i+1] <= array_metadata_moving[i];
+                end
+              end
+            end
           end
         end
-      end
+        SHIFTOUT: begin
+          if (!out_valid) begin
+            state <= RUN;
+          end else if (out_ready) begin
+            array_valid[0] <= 1'b0;
+            for (int i = 0; i < ELEMENTS-1; i++) begin
+              array_valid[i+1] <= array_valid[i];
+              array_data[i+1] <= array_data[i];
+              array_metadata[i+1] <= array_metadata[i];
+            end
+          end
+        end
+      endcase
     end
   end
 
   always_comb begin : outputSelect
-    out_valid = array_valid[out_address];
-    out_data = array_data[out_address];
-    out_metadata = array_metadata[out_address];
+    out_valid = array_valid[ELEMENTS-1] && (state == SHIFTOUT);
+    out_data = array_data[ELEMENTS-1];
+    out_metadata = array_metadata[ELEMENTS-1];
   end
 endmodule

@@ -24,22 +24,28 @@ async def test_a(dut):
 
     await RisingEdge(dut.out_last)
 
-    sorted_data = sorted(test_data)[:NUM_ELEMENTS]
-    for i, val in enumerate(sorted_data):
-        dut.out_address.value = i
-        await ReadOnly()
-        output_value = dut.out_data.value.to_unsigned()
-        # print(f"Got output value: {output_value}, expected {val}")
-        assert output_value == val, (
-            f"at index {i}, expected {val} but got {output_value}"
-        )
-        await ClockCycles(dut.clk, 1)
+    await RisingEdge(dut.out_valid)
+    # enter shiftout state (should be just 1 clock cycle later)
 
+    sorted_data = sorted(test_data)[:NUM_ELEMENTS]
     assert dut.largest_valid.value == 1, "Expected largest_valid to be 1"
     assert dut.largest.value == sorted_data[-1], (
         f"Expected largest value to be {sorted_data[-1]},"
         f" but got {dut.largest.value.to_unsigned()}"
     )
+
+    for i, val in reversed(list(enumerate(sorted_data))):
+        # await RisingEdge(dut.clk)
+        dut.out_ready.value = 1
+        await ReadOnly()
+        assert int(dut.out_valid.value) == 1, "Expected out_valid to be 1"
+        output_value = dut.out_data.value.to_unsigned()
+        print(f"Got output value: {output_value}, expected {val}")
+        assert output_value == val, (
+            f"at index {i}, expected {val} but got {output_value}"
+        )
+
+        await ClockCycles(dut.clk, 1)
 
 
 if __name__ == "__main__":
