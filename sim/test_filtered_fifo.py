@@ -1,6 +1,6 @@
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, ReadOnly
+from cocotb.triggers import ClockCycles, RisingEdge
 import random
 from sim.lib import build_and_run_sim, reset
 
@@ -37,6 +37,8 @@ def create_keep_mask(batch, threshold):
 async def send_batched_data(dut, *, data_batches, keep_threshold):
     """Send batched data with keep masks based on threshold."""
     for batch in data_batches:
+        while not dut.in_ready.value:
+            await RisingEdge(dut.in_ready)
         keep_mask = create_keep_mask(batch, keep_threshold)
         dut.in_data.value = batch
         dut.in_keep.value = keep_mask
@@ -65,7 +67,7 @@ async def receive_filtered_data(dut, *, expected_data=None, count=None):
 
     if expected_data is not None:
         assert received_data == expected_data, (
-            f"Received data {received_data} does not match expected {expected_data}"
+            f"Received data of length {len(received_data)} does not match expected of length {len(expected_data)}"
         )
     return received_data
 
@@ -75,7 +77,7 @@ async def test_a(dut):
     cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
     await reset(dut.clk, dut.rst, 2)
 
-    test_data = generate_test_data(20)
+    test_data = generate_test_data(1000)
 
     data_batches = batch_data(test_data, MAX_INPUTS)
 
@@ -83,7 +85,9 @@ async def test_a(dut):
 
     expected_output = [val for val in test_data if val < threshold]
 
-    await send_batched_data(dut, data_batches=data_batches, keep_threshold=threshold)
+    cocotb.start_soon(
+        send_batched_data(dut, data_batches=data_batches, keep_threshold=threshold)
+    )
 
     await ClockCycles(dut.clk, 5)
 
