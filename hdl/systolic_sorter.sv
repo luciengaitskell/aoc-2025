@@ -40,10 +40,10 @@ module systolic_sorter #(
 
 
   always_comb begin : inputAssign
-    assign array_valid_moving[0] = in_valid;
-    assign array_data_moving[0] = in_data;
-    assign array_metadata_moving[0] = in_metadata;
-    assign last_moving[0] = in_last;
+    array_valid_moving[0] = in_valid;
+    array_data_moving[0] = in_data;
+    array_metadata_moving[0] = in_metadata;
+    last_moving[0] = in_last;
   end
 
   always_comb begin : largestAssign
