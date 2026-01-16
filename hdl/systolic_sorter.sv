@@ -121,6 +121,9 @@ module systolic_sorter #(
             end
           end
         end
+        default: begin
+          state <= RUN;
+        end
       endcase
     end
   end
