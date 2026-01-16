@@ -2,18 +2,16 @@ module fifo #(
     parameter int BIT_WIDTH = 32,
     parameter int DEPTH = 16,
     parameter int READ_CYCLES = 0,
-    parameter type METADATA_TYPE = logic
+    parameter type DATA_TYPE = logic [BIT_WIDTH-1:0]
 ) (
     input logic clk,
 
     input logic rst,
     input logic in_valid,
-    input logic [BIT_WIDTH-1:0] in_data,
-    input METADATA_TYPE in_metadata,
+    input DATA_TYPE in_data,
     input logic out_enable,
     output logic out_valid,
-    output logic [BIT_WIDTH-1:0] out_data,
-    output METADATA_TYPE out_metadata,
+    output DATA_TYPE out_data,
     output logic full,
     output logic empty
 );
@@ -24,10 +22,7 @@ module fifo #(
     else $fatal(1, "READ_CYCLES must be 0 or 1.");
   end
   localparam int ADDR_BIT_WIDTH = $clog2(DEPTH);
-  struct packed {
-    logic [BIT_WIDTH-1:0] data;
-    METADATA_TYPE         metadata;
-  } mem[0:DEPTH-1];
+  DATA_TYPE mem[0:DEPTH-1];
   logic [ADDR_BIT_WIDTH-1:0] write_ptr;
   logic [ADDR_BIT_WIDTH-1:0] read_ptr;
 
@@ -38,8 +33,7 @@ module fifo #(
     if (rst) begin
       write_ptr <= '0;
     end else if (in_valid && !full) begin
-      mem[write_ptr].data <= in_data;
-      mem[write_ptr].metadata <= in_metadata;
+      mem[write_ptr] <= in_data;
       write_ptr <= write_ptr + ADDR_BIT_WIDTH'(1'b1);
     end
   end
@@ -47,8 +41,7 @@ module fifo #(
   if (READ_CYCLES == 0) begin : zeroCycleRead
     always_comb begin : readLogic
       out_valid = !empty;
-      out_data = mem[read_ptr].data;
-      out_metadata = mem[read_ptr].metadata;
+      out_data  = mem[read_ptr];
     end
     always_ff @(posedge clk) begin : readPtrAdvance
       if (rst) begin
@@ -61,15 +54,13 @@ module fifo #(
     // FIXME: write test for this
     always_ff @(posedge clk) begin : readLogic
       if (rst) begin
-        read_ptr <= '0;
+        read_ptr  <= '0;
         out_valid <= 1'b0;
-        out_data <= '0;
-        out_metadata <= '0;
+        out_data  <= '0;
       end else if (out_enable && !empty) begin
-        out_data <= mem[read_ptr].data;
-        out_metadata <= mem[read_ptr].metadata;
+        out_data  <= mem[read_ptr];
         out_valid <= 1'b1;
-        read_ptr <= read_ptr + ADDR_BIT_WIDTH'(1'b1);
+        read_ptr  <= read_ptr + ADDR_BIT_WIDTH'(1'b1);
       end else begin
         out_valid <= 1'b0;
       end
