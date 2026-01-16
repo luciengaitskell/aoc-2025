@@ -42,7 +42,7 @@ module filtered_fifo #(
   logic [MAX_INPUTS-1:0] fifo_full;
   // logic [MAX_INPUTS-1:0] fifo_empty;
 
-  assign in_ready = !(&fifo_full);
+  assign in_ready = !(|fifo_full);
   wire in_transaction = in_valid && (in_count > 0) && in_ready;
 
 
