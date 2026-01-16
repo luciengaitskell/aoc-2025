@@ -2,15 +2,18 @@ module coord_distance #(
     parameter int COORD_BIT_WIDTH = 12,
     parameter int DIMENSIONS = 3,
     parameter int BATCH_SIZE = 16,
-    localparam int DISTANCE_SQ_BIT_WIDTH = (2 * COORD_BIT_WIDTH) + $clog2(3)
+    localparam int DISTANCE_SQ_BIT_WIDTH = (2 * COORD_BIT_WIDTH) + $clog2(3),
+    parameter type METADATA_TYPE = logic
 ) (
     input logic clk,
     input logic rst,
     input logic [COORD_BIT_WIDTH-1:0] reference_point[0:DIMENSIONS-1],
     input logic in_valid,
     input logic [COORD_BIT_WIDTH-1:0] coords[0:BATCH_SIZE-1][0:DIMENSIONS-1],
+    input METADATA_TYPE in_metadata[0:BATCH_SIZE-1],
     output logic out_valid,
-    output logic [DISTANCE_SQ_BIT_WIDTH-1:0] distances_sq[0:BATCH_SIZE-1]
+    output logic [DISTANCE_SQ_BIT_WIDTH-1:0] distances_sq[0:BATCH_SIZE-1],
+    output METADATA_TYPE out_metadata[0:BATCH_SIZE-1]
 );
 
   always_ff @(posedge clk) begin : calculate
@@ -18,6 +21,7 @@ module coord_distance #(
       out_valid <= 1'b0;
     end else begin
       out_valid <= in_valid;
+      out_metadata <= in_metadata;
       for (int i = 0; i < BATCH_SIZE; i++) begin
         logic [DISTANCE_SQ_BIT_WIDTH-1:0] sum;
         sum = '0;
