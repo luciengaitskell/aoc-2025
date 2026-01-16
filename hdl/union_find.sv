@@ -10,8 +10,11 @@ module union_find #(
     input logic rst,
     input logic in_valid,
     input METADATA_TYPE in_metadata,
-    output logic in_ready
-
+    output logic in_ready,
+    input logic [INDEX_BIT_WIDTH-1:0] out_index,
+    output logic out_valid,
+    output logic out_is_root,
+    output logic [INDEX_BIT_WIDTH-1:0] out_size
 );
 
   typedef struct packed {
@@ -32,6 +35,12 @@ module union_find #(
     COMPRESS
   } state;
   assign in_ready = (state == READIN);
+
+  always_comb begin
+    out_valid = state == IDLE;
+    out_is_root = nodes[out_index].is_root;
+    out_size    = nodes[out_index].payload.size;
+  end
 
   logic [INDEX_BIT_WIDTH-1:0] search_from;
   logic [INDEX_BIT_WIDTH-1:0] compressing_node;

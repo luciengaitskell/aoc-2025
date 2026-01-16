@@ -14,12 +14,12 @@ def pack_metadata(dut, u, v):
     return (int(u) << half) | int(v)
 
 
-def unpack_node(dut, node_idx):
-    raw = int(dut.nodes[node_idx].value)
-    width = len(dut.nodes[node_idx])
-    payload_width = width - 1
-    is_root = (raw >> payload_width) & 1
-    payload = raw & ((1 << payload_width) - 1)
+async def unpack_node(dut, node_idx):
+    dut.out_index.value = node_idx
+    await ReadOnly()
+    assert dut.out_valid.value == 1, "Expected out_valid to be 1"
+    is_root = int(dut.out_is_root.value)
+    payload = int(dut.out_size.value)
     return is_root, payload
 
 
@@ -49,14 +49,14 @@ async def test_a(dut):
         assert False, "Timeout waiting for union_find to return to IDLE"
 
     expected_roots = {0: 0, 1: 0, 2: 0, 3: 0, 4: 4, 5: 4, 6: 4, 7: 4}
-    await ReadOnly()
     for node, root in expected_roots.items():
-        is_root, payload = unpack_node(dut, node)
+        is_root, payload = await unpack_node(dut, node)
         if node == root:
             assert is_root == 1, f"Expected node {node} to be root"
         else:
             assert is_root == 0, f"Expected node {node} to be non-root"
             assert payload == root, f"Expected node {node} parent {root}, got {payload}"
+        await ClockCycles(dut.clk, 1)
 
 
 if __name__ == "__main__":
