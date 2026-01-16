@@ -21,16 +21,18 @@ module filtered_fifo #(
     else $fatal(1, "MAX_INPUTS must be even.");
     assert (FIFO_DEPTH > 0 && (FIFO_DEPTH % 2) == 0 && (FIFO_DEPTH % MAX_INPUTS) == 0)
     else $fatal(1, "FIFO_DEPTH must be even and divisible by MAX_INPUTS.");
+    assert (BIT_WIDTH == $bits(DATA_TYPE))
+    else $fatal(1, "BIT_WIDTH must match DATA_TYPE size.");
   end
 
   localparam int FIFO_PTR_WIDTH   = $clog2(MAX_INPUTS);
   localparam int FIFO_COUNT_WIDTH = $clog2(MAX_INPUTS + 1);
 
-  logic [BIT_WIDTH-1:0] in_data_compacted[0:MAX_INPUTS-1];
+  DATA_TYPE in_data_compacted[0:MAX_INPUTS-1];
   logic [FIFO_COUNT_WIDTH-1:0] in_count;
   always_comb begin
     in_count = 0;
-    in_data_compacted = '{default: 0};
+    in_data_compacted = '{default: '0};
     for (int i = 0; i < MAX_INPUTS; i++) begin
       if (in_keep[i]) begin
         in_data_compacted[in_count[FIFO_PTR_WIDTH-1:0]] = in_data[i];
@@ -47,7 +49,7 @@ module filtered_fifo #(
   wire in_transaction = in_valid && (in_count > 0) && in_ready;
 
 
-  logic [BIT_WIDTH-1:0] fifo_out_data[0:MAX_INPUTS-1];
+  DATA_TYPE fifo_out_data[0:MAX_INPUTS-1];
   logic fifo_out_valid[0:MAX_INPUTS-1];
   logic [FIFO_PTR_WIDTH-1:0] next_fifo_read;
   assign out_valid = fifo_out_valid[next_fifo_read];
@@ -69,7 +71,8 @@ module filtered_fifo #(
       fifo #(
           .BIT_WIDTH  (BIT_WIDTH),
           .DEPTH      (256),
-          .READ_CYCLES(0)           // change to 1 if timing issues arise
+          .READ_CYCLES(0),          // change to 1 if timing issues arise
+          .DATA_TYPE  (DATA_TYPE)
       ) fifo (
           .clk       (clk),
           .rst       (rst),
