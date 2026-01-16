@@ -42,7 +42,7 @@ def build_and_run_sim(
     source_root = Path(proj_path / "hdl")
     source_paths = list(source_root.glob("**/*.sv"))
     if additional_sources:
-        source_paths += [proj_path / "hdl" / source for source in additional_sources]
+        source_paths += [proj_path / source for source in additional_sources]
     includes_paths = [source_root / "model" / "includes"]
     includes_paths += [proj_path / "hdl" / inc for inc in includes] if includes else []
 
