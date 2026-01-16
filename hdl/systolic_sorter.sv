@@ -1,15 +1,9 @@
 
-localparam int INDEX_WIDTH = 32;
-
-typedef struct packed {
-  logic [INDEX_WIDTH-1:0] id1;
-  logic [INDEX_WIDTH-1:0] id2;
-} id_pair_s;
 
 module systolic_sorter #(
     parameter int ELEMENTS = 64,
     parameter int BIT_WIDTH = 32,
-    parameter type METADATA_TYPE = id_pair_s
+    parameter type METADATA_TYPE = logic
 ) (
     input logic clk,
     input logic rst,
@@ -34,13 +28,13 @@ module systolic_sorter #(
 
   logic array_valid[0:ELEMENTS-1];
   logic [BIT_WIDTH-1:0] array_data[0:ELEMENTS-1];
-  id_pair_s array_metadata[0:ELEMENTS-1];
+  METADATA_TYPE array_metadata[0:ELEMENTS-1];
   // the values moving are being propagated
   //  note that it is one element larger to make my generator loops cleaner
   //  (the last element should not be used)
   logic array_valid_moving[0:ELEMENTS];
   logic [BIT_WIDTH-1:0] array_data_moving[0:ELEMENTS];
-  id_pair_s array_metadata_moving[0:ELEMENTS];
+  METADATA_TYPE array_metadata_moving[0:ELEMENTS];
   logic last_moving[0:ELEMENTS];
 
 
