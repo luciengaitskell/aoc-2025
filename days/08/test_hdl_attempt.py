@@ -1,6 +1,6 @@
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, RisingEdge
+from cocotb.triggers import ClockCycles, RisingEdge, FallingEdge
 import numpy as np
 import importlib
 
@@ -16,7 +16,7 @@ DIMENSIONS = 3
 BATCH_SIZE = 4
 TOP_N = 3
 MAX_NODE_COUNT = 10
-SORTER_ELEMENTS = 4
+SORTER_ELEMENTS = 6
 
 
 def generate_coords(count):
@@ -73,8 +73,11 @@ async def test_a(dut):
     )
 
     await drive_stream(dut, coords)
+    dut._log.info("All input driven")
 
-    await RisingEdge(dut.uf_out_valid)
+    dut._log.info("Waiting for sorter output to exhaust")
+    await FallingEdge(dut.sorter_out_valid)
+    dut._log.info("Sorter output finished, waiting for top output valid")
     await RisingEdge(dut.out_valid)
 
     got_sizes = [int(dut.top_sizes[i].value) for i in range(TOP_N)]

@@ -229,6 +229,11 @@ module day08_top #(
         out_valid <= 1'b0;
         sweep_active <= 1'b1;
         sweep_index <= '0;
+
+        for (int d = 0; d < TOP_N; d++) begin
+          top_sizes[d] <= '0;
+          top_roots[d] <= '0;
+        end
       end
     end else begin
       for (int d = 0; d < TOP_N; d++) begin
