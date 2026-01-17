@@ -61,21 +61,25 @@ def top_m_cc_sizes(pairs, m):
     return np.sort(sizes)[::-1][:m]  # top m
 
 
+def solve_coords(coords, *, k=1000, m=3):
+    X = np.array(coords, dtype=np.uint32)
+    pairs, distances = top_k_closest_pairs_l2(X, k)
+    print("top k pairs of node indices:", pairs)
+    print("Top k closest pair distances:", distances)
+    top_sizes = top_m_cc_sizes(pairs, m)
+    return top_sizes, int(np.prod(top_sizes))
+
+
 def solve():
     coords = []
     for line in load_input(__file__):
         new_coords = line.split(",")
         coords.append([int(c) for c in new_coords])
-    X = np.array(coords, dtype=np.uint32)
     k = 1000
-    pairs, distances = top_k_closest_pairs_l2(X, k)
-    # print("Top k closest pairs (indices):", pairs)
-    # print("Distances squared:", distances)
-
     m = 3
-    top_sizes = top_m_cc_sizes(pairs, m)
+    top_sizes, product = solve_coords(coords, k=k, m=m)
     print(f"Top {m} connected component sizes:", top_sizes)
-    print("Product of top sizes:", np.prod(top_sizes))
+    print("Product of top sizes:", product)
 
 
 if __name__ == "__main__":
