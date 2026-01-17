@@ -1,11 +1,11 @@
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, ReadOnly
+from cocotb.triggers import ClockCycles, ReadOnly, RisingEdge, FallingEdge
 from sim.lib import build_and_run_sim, reset
 
 
 MAX_NODE_COUNT = 8
-STATE_IDLE = 0
+STATE_READIN = 0
 
 
 def pack_metadata(dut, u, v):
@@ -30,11 +30,16 @@ async def test_a(dut):
 
     edges = [(0, 1), (0, 2), (2, 3), (4, 5), (4, 6), (6, 7)]
 
-    dut.in_valid.value = 1
-    dut.in_metadata.value = pack_metadata(dut, 0, 0)
+    # dut.in_metadata.value = pack_metadata(dut, 0, 0)
     await ClockCycles(dut.clk, 1)
 
+    dut.in_valid.value = 1
     for u, v in edges:
+        await ReadOnly()
+        while not int(dut.in_ready.value):
+            await RisingEdge(dut.in_ready)
+        await FallingEdge(dut.clk)
+        dut._log.info(f"Feeding edge ({u}, {v})")
         dut.in_metadata.value = pack_metadata(dut, u, v)
         await ClockCycles(dut.clk, 1)
 
@@ -43,7 +48,7 @@ async def test_a(dut):
 
     for _ in range(200):
         await ClockCycles(dut.clk, 1)
-        if int(dut.state.value) == STATE_IDLE:
+        if int(dut.state.value) == STATE_READIN:
             break
     else:
         assert False, "Timeout waiting for union_find to return to IDLE"
@@ -51,6 +56,10 @@ async def test_a(dut):
     expected_roots = {0: 0, 1: 0, 2: 0, 3: 0, 4: 4, 5: 4, 6: 4, 7: 4}
     for node, root in expected_roots.items():
         is_root, payload = await unpack_node(dut, node)
+        dut._log.info(
+            f"Node {node}: is_root={is_root}, payload={payload}, expected_root={root}"
+        )
+
         if node == root:
             assert is_root == 1, f"Expected node {node} to be root"
         else:
