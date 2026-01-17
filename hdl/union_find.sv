@@ -47,8 +47,6 @@ module union_find #(
 
   logic [INDEX_BIT_WIDTH-1:0] compress_from_v;
   logic [INDEX_BIT_WIDTH-1:0] compress_from_u;
-  // logic [INDEX_BIT_WIDTH-1:0] start_node_v;
-  // logic [INDEX_BIT_WIDTH-1:0] start_node_u;
   logic [INDEX_BIT_WIDTH-1:0] root_v;
   logic [INDEX_BIT_WIDTH-1:0] root_u;
 
@@ -56,7 +54,6 @@ module union_find #(
   function automatic logic [INDEX_BIT_WIDTH-1:0] findNodeRoot(
       logic [INDEX_BIT_WIDTH-1:0] root, state_t current_state, state_t next_state);
     uf_node_t s0, s1, s2, s3, s4, s5;
-    // compressing_node <= search_from;
 
     s0 = nodes[root];
     s1 = nodes[s0.payload.parent_idx];
@@ -98,20 +95,13 @@ module union_find #(
       end
     end else begin
       case (state)
-        // IDLE: begin
-        //   if (in_valid) begin
-        //     state <= READIN;
-        //   end
-        // end
         READIN: begin
           if (in_valid) begin
             state <= FINDROOT_V;
             root_v <= in_metadata.v;
             compress_from_v <= in_metadata.v;
-            // start_node_v <= in_metadata.v;
             root_u <= in_metadata.u;
             compress_from_u <= in_metadata.u;
-            // start_node_u <= in_metadata.u;
           end
         end
         FINDROOT_V: begin
@@ -163,23 +153,6 @@ module union_find #(
           end
           state <= READIN;
         end
-        // COMPRESS: begin
-        //   if (compressing_node == root) begin
-        //     nodes[root].payload.size <= nodes[root].payload.size + INDEX_BIT_WIDTH'(1'b1);
-        //     if (search_from == INDEX_BIT_WIDTH'($unsigned(MAX_NODE_COUNT - 1))) begin
-        //       state <= IDLE;
-        //     end else begin
-        //       logic [INDEX_BIT_WIDTH-1:0] new_node;
-        //       new_node = search_from + INDEX_BIT_WIDTH'(1'b1);
-        //       search_from <= new_node;
-        //       root <= new_node;
-        //       state <= FINDROOT;
-        //     end
-        //   end else begin
-        //     nodes[compressing_node].payload.parent_idx <= root;
-        //     compressing_node <= nodes[compressing_node].payload.parent_idx;
-        //   end
-        // end
         default: begin
           state <= READIN;
         end
