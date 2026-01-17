@@ -113,11 +113,16 @@ module day08_top #(
   logic [BATCH_SIZE-1:0] in_keep;
   logic largest_valid;
   logic [DISTANCE_SQ_BIT_WIDTH-1:0] largest;
+  logic [BATCH_SIZE-1:0] delayed_batch_valid;
+  always_ff @(posedge clk) begin
+    delayed_batch_valid <= batch_valid;
+  end
+
   always_comb begin
     valid_kept_found = 1'b0;
     valid_kept_found_index = '0;
     for (int i = 0; i < BATCH_SIZE; i++) begin
-      if ((out_metadata[i].u != out_metadata[i].v) && (!largest_valid || (distances_sq[i] < largest)) && batch_valid[i]) begin
+      if ((out_metadata[i].u != out_metadata[i].v) && (!largest_valid || (distances_sq[i] < largest)) && delayed_batch_valid[i]) begin
         in_keep[i] = 1'b1;
         valid_kept_found = 1'b1;
         valid_kept_found_index = batch_indices[i];

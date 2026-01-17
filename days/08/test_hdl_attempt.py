@@ -13,8 +13,8 @@ solve_coords = attempt.solve_coords
 
 COORD_BIT_WIDTH = 8
 DIMENSIONS = 3
-BATCH_SIZE = 2
-TOP_N = 2
+BATCH_SIZE = 4
+TOP_N = 3
 MAX_NODE_COUNT = 10
 SORTER_ELEMENTS = 4
 
