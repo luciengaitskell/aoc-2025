@@ -25,9 +25,6 @@ module day08_top #(
     input logic [BATCH_SIZE-1:0] batch_valid,
 
     output logic out_valid,
-    // output logic out_is_root,
-    // output logic [INDEX_BIT_WIDTH-1:0] out_size,
-
     output logic [INDEX_BIT_WIDTH-1:0] top_sizes[0:TOP_N-1],
     output logic [INDEX_BIT_WIDTH-1:0] top_roots[0:TOP_N-1],
     output logic [PRODUCT_BIT_WIDTH-1:0] top_product
@@ -104,21 +101,13 @@ module day08_top #(
   );
 
   logic valid_kept_found;
-  // logic inter_valid_kept_found;
-  // logic last_valid_kept_found;
   logic [INDEX_BIT_WIDTH-1:0] valid_kept_found_index;
-  // logic [INDEX_BIT_WIDTH-1:0] inter_valid_kept_found_index;
-  // logic [INDEX_BIT_WIDTH-1:0] last_valid_kept_found_index;
   always_ff @(posedge clk) begin
     if (rst) begin
       coord_last <= 1'b0;
     end else begin
       coord_last <= batch_stream_end;
     end
-    // inter_valid_kept_found <= valid_kept_found;
-    // last_valid_kept_found <= inter_valid_kept_found;
-    // inter_valid_kept_found_index <= valid_kept_found_index;
-    // last_valid_kept_found_index  <= inter_valid_kept_found_index;
   end
 
   logic [BATCH_SIZE-1:0] in_keep;
@@ -137,10 +126,6 @@ module day08_top #(
       end
     end
   end
-  // logic [BATCH_SIZE-1:0] fifo_in_keep;
-  // always_ff @(posedge clk) begin
-  //   fifo_in_keep <= in_keep;
-  // end
 
   logic reset_last_only_pulse;
   always_ff @(posedge clk) begin
@@ -229,9 +214,6 @@ module day08_top #(
       .out_size   (uf_out_size)
   );
 
-  // assign out_valid = uf_out_valid;
-  // assign out_is_root = uf_out_is_root;
-  // assign out_size = uf_out_size;
   assign in_ready = fifo_ready;
 
   always_ff @(posedge clk) begin
