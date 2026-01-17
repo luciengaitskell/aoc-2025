@@ -5,25 +5,36 @@ import numpy as np
 import importlib
 
 from sim.lib import build_and_run_sim, reset
+from days.lib.input import load_input
 
 # integer in dir name breaks standard import
 attempt = importlib.import_module("days.08.attempt")
 solve_coords = attempt.solve_coords
+load_coords = attempt.load_coords
 
 
-COORD_BIT_WIDTH = 8
 DIMENSIONS = 3
 BATCH_SIZE = 4
 TOP_N = 3
-MAX_NODE_COUNT = 100
-SORTER_ELEMENTS = 10
 
+if False:
+    COORD_BIT_WIDTH = 32
+    coords = load_coords()
+    MAX_NODE_COUNT = len(coords)
+    assert MAX_NODE_COUNT == 1000
+    SORTER_ELEMENTS = MAX_NODE_COUNT
+else:
+    COORD_BIT_WIDTH = 24
+    MAX_NODE_COUNT = 1000
+    SORTER_ELEMENTS = 1000
 
-def generate_coords(count):
-    rng = np.random.default_rng(1234)
-    return rng.integers(
-        0, 1 << COORD_BIT_WIDTH, size=(count, DIMENSIONS), dtype=np.uint32
-    )
+    def generate_coords(count):
+        rng = np.random.default_rng(1234)
+        return rng.integers(
+            0, (1 << COORD_BIT_WIDTH) - 1, size=(count, DIMENSIONS), dtype=np.uint32
+        )
+
+    coords = generate_coords(MAX_NODE_COUNT)
 
 
 def batch_indices(indices, batch_size, pad_value):
@@ -65,7 +76,6 @@ async def test_a(dut):
     cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
     await reset(dut.clk, dut.rst, 2)
 
-    coords = generate_coords(MAX_NODE_COUNT)
     expected_sizes, expected_product = solve_coords(
         coords,
         k=SORTER_ELEMENTS,

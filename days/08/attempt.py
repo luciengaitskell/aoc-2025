@@ -62,19 +62,22 @@ def top_m_cc_sizes(pairs, m):
 
 
 def solve_coords(coords, *, k=1000, m=3):
-    X = np.array(coords, dtype=np.uint32)
-    pairs, distances = top_k_closest_pairs_l2(X, k)
+    pairs, distances = top_k_closest_pairs_l2(coords, k)
     print("top k pairs of node indices:", pairs)
     print("Top k closest pair distances:", distances)
     top_sizes = top_m_cc_sizes(pairs, m)
     return top_sizes, int(np.prod(top_sizes))
 
-
-def solve():
+def load_coords():
     coords = []
     for line in load_input(__file__):
         new_coords = line.split(",")
         coords.append([int(c) for c in new_coords])
+    return np.array(coords, dtype=np.uint32)
+
+
+def solve():
+    coords = load_coords()
     k = 1000
     m = 3
     top_sizes, product = solve_coords(coords, k=k, m=m)
