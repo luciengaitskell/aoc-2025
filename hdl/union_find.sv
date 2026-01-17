@@ -45,13 +45,12 @@ module union_find #(
   logic [INDEX_BIT_WIDTH-1:0] search_from;
   logic [INDEX_BIT_WIDTH-1:0] compressing_node;
   logic [INDEX_BIT_WIDTH-1:0] root;
-  logic [INDEX_BIT_WIDTH-1:0] depth;
 
   always_ff @(posedge clk) begin
     if (rst) begin
       state <= IDLE;
       for (int i = 0; i < MAX_NODE_COUNT; i++) begin
-        nodes[i] <= '{is_root: 1'b1, payload: INDEX_BIT_WIDTH'(1'b1)};
+        nodes[i] <= '{is_root: 1'b1, payload: '0};
       end
     end else begin
       case (state)
@@ -71,7 +70,6 @@ module union_find #(
         end
         FINDROOT: begin
           uf_node_t s0, s1, s2, s3, s4, s5;
-          depth <= 0;
           compressing_node <= search_from;
 
           s0 = nodes[root];
@@ -107,7 +105,7 @@ module union_find #(
         end
         COMPRESS: begin
           if (compressing_node == root) begin
-            nodes[root].payload.size <= nodes[root].payload.size + depth;
+            nodes[root].payload.size <= nodes[root].payload.size + INDEX_BIT_WIDTH'(1'b1);
             if (search_from == INDEX_BIT_WIDTH'($unsigned(MAX_NODE_COUNT - 1))) begin
               state <= IDLE;
             end else begin
@@ -118,7 +116,6 @@ module union_find #(
               state <= FINDROOT;
             end
           end else begin
-            depth <= depth + INDEX_BIT_WIDTH'(1'b1);
             nodes[compressing_node].payload.parent_idx <= root;
             compressing_node <= nodes[compressing_node].payload.parent_idx;
           end
