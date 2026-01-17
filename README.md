@@ -1,6 +1,10 @@
 # aoc-2025
 my approaches to Advent of Code 2025
 
+```
+uv run -m days.08.test_hdl_attempt
+```
+
 ### Jane Street Advent of FPGA
 
 I built day 8 in an FPGA design with the following architecture:
