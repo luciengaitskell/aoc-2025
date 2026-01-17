@@ -78,8 +78,11 @@ async def test_a(dut):
     dut._log.info("Waiting for sorter output to exhaust")
     await FallingEdge(dut.sorter_out_valid)
     dut._log.info("Sorter output finished, waiting for top output valid")
-    await RisingEdge(dut.out_valid)
+    for _ in range(2):
+        # exhaust stale half-accumulation so wait for second valid
+        await RisingEdge(dut.out_valid)
 
+    dut._log.info("Top output valid, sampling results")
     got_sizes = [int(dut.top_sizes[i].value) for i in range(TOP_N)]
     got_product = int(dut.top_product.value)
 
