@@ -1,12 +1,10 @@
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, RisingEdge, FallingEdge, ReadOnly
+from cocotb.triggers import ClockCycles, RisingEdge, ReadOnly
 import numpy as np
 import importlib
-import random
 
 from sim.lib import build_and_run_sim, reset
-from days.lib.input import load_input
 
 # integer in dir name breaks standard import
 attempt = importlib.import_module("days.08.attempt")
