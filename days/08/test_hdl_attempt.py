@@ -1,8 +1,9 @@
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, RisingEdge, FallingEdge
+from cocotb.triggers import ClockCycles, RisingEdge, FallingEdge, ReadOnly
 import numpy as np
 import importlib
+import random
 
 from sim.lib import build_and_run_sim, reset
 from days.lib.input import load_input
@@ -26,15 +27,35 @@ if False:
 else:
     COORD_BIT_WIDTH = 24
     MAX_NODE_COUNT = 1000
-    SORTER_ELEMENTS = 1000
+    SORTER_ELEMENTS = MAX_NODE_COUNT  # to match AoC problem
 
     def generate_coords(count):
-        rng = np.random.default_rng(1234)
+        # seed = random.randint(0, 2**32 - 1)
+        seed = 2011504658
+        print(f"Using random seed {seed}")
+        rng = np.random.default_rng(seed)
         return rng.integers(
-            0, (1 << COORD_BIT_WIDTH) - 1, size=(count, DIMENSIONS), dtype=np.uint32
+            0, (1 << COORD_BIT_WIDTH) - 1, size=(count, DIMENSIONS), dtype=np.uint64
         )
-
     coords = generate_coords(MAX_NODE_COUNT)
+
+
+def unpack_two_packed_values(sig):
+    meta_value = int(sig.value)
+    meta_width = len(sig)
+    half_width = meta_width // 2
+    mask = (1 << half_width) - 1
+    v = meta_value & mask
+    u = (meta_value >> half_width) & mask
+    return u, v
+
+
+def diff_pairs(actual_pairs, expected_pairs):
+    actual_set = {p: i for i, p in enumerate(actual_pairs)}
+    expected_set = {p: i for i, p in enumerate(expected_pairs)}
+    extras = [(i, p) for p, i in actual_set.items() if p not in expected_set]
+    missing = [(i, p) for p, i in expected_set.items() if p not in actual_set]
+    return extras, missing
 
 
 def batch_indices(indices, batch_size, pad_value):
@@ -74,9 +95,18 @@ async def drive_stream(dut, coords):
 @cocotb.test
 async def test_a(dut):
     cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
+
     await reset(dut.clk, dut.rst, 2)
 
-    expected_sizes, expected_product = solve_coords(
+    for idx in [1, 2, 4]:
+        print(f"Coord {idx}: {coords[idx]}")
+
+    for idx in [(1, 4), (2, 4)]:
+        diff = coords[idx[0]] - coords[idx[1]]
+        dist2 = np.sum(diff**2)
+        print(f"Distance^2 between {idx[0]} and {idx[1]}: {dist2}")
+
+    expected_sizes, expected_product, expected_pairs, _ = solve_coords(
         coords,
         k=SORTER_ELEMENTS,
         m=TOP_N,
@@ -86,7 +116,24 @@ async def test_a(dut):
     dut._log.info("All input driven")
 
     dut._log.info("Waiting for sorter output to exhaust")
-    await FallingEdge(dut.sorter_out_valid)
+    await RisingEdge(dut.sorter_out_valid)
+
+    top_k_pairs = []
+    while dut.sorter_out_valid.value:
+        while not dut.uf_in_ready.value:
+            await RisingEdge(dut.uf_in_ready)
+        await ReadOnly()
+
+        top_k_pairs.append(unpack_two_packed_values(dut.sorter_out_metadata))
+        await ClockCycles(dut.clk, 1)
+        await ReadOnly()
+
+    expected_pairs = [tuple(map(int, pair)) for pair in expected_pairs]
+    extras, missing = diff_pairs(top_k_pairs, list(reversed(expected_pairs)))
+    if extras:
+        dut._log.warning(f"Extra pairs in top_k_pairs at indices: {extras}")
+    assert not missing, f"Missing expected pairs at indices: {missing}"
+
     dut._log.info("Sorter output finished, waiting for top output valid")
     for _ in range(2):
         # exhaust stale half-accumulation so wait for second valid
