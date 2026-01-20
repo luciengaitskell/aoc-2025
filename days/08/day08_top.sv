@@ -95,6 +95,7 @@ module day08_top #(
       .in_valid       (coord_in_valid),
       .coords         (batch_coords),
       .in_indices     (batch_indices),
+      .out_ready      (fifo_ready),
       .out_valid      (coord_out_valid),
       .distances_sq   (distances_sq),
       .out_metadata   (out_metadata)

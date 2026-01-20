@@ -17,6 +17,7 @@ module coord_distance #(
     input logic in_valid,
     input logic [COORD_BIT_WIDTH-1:0] coords[0:BATCH_SIZE-1][0:DIMENSIONS-1],
     input INDEX_TYPE in_indices[0:BATCH_SIZE-1],
+    input logic out_ready,
     output logic out_valid,
     output logic [DISTANCE_SQ_BIT_WIDTH-1:0] distances_sq[0:BATCH_SIZE-1],
     output METADATA_TYPE out_metadata[0:BATCH_SIZE-1]
@@ -25,7 +26,7 @@ module coord_distance #(
   always_ff @(posedge clk) begin : calculate
     if (rst) begin
       out_valid <= 1'b0;
-    end else begin
+    end else if (out_ready) begin
       out_valid <= in_valid;
       for (int i = 0; i < BATCH_SIZE; i++) begin
         out_metadata[i].u <= reference_index;
