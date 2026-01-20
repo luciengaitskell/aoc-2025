@@ -95,6 +95,7 @@ module day08_top #(
       .in_valid       (coord_in_valid),
       .coords         (batch_coords),
       .in_indices     (batch_indices),
+      .out_ready      (fifo_ready),
       .out_valid      (coord_out_valid),
       .distances_sq   (distances_sq),
       .out_metadata   (out_metadata)
@@ -125,7 +126,7 @@ module day08_top #(
       if ((out_metadata[i].u != out_metadata[i].v) && (!largest_valid || (distances_sq[i] < largest)) && delayed_batch_valid[i]) begin
         in_keep[i] = 1'b1;
         valid_kept_found = 1'b1;
-        valid_kept_found_index = batch_indices[i];
+        valid_kept_found_index = out_metadata[i].v;
       end else begin
         in_keep[i] = 1'b0;
       end
@@ -146,7 +147,7 @@ module day08_top #(
     for (int i = 0; i < BATCH_SIZE; i++) begin
       fifo_in_data[i].distance_sq = distances_sq[i];
       fifo_in_data[i].metadata = out_metadata[i];
-      fifo_in_data[i].last = coord_last && valid_kept_found && (batch_indices[i] == valid_kept_found_index);
+      fifo_in_data[i].last = coord_last && valid_kept_found && (out_metadata[i].v == valid_kept_found_index);
     end
   end
   logic fifo_out_valid;

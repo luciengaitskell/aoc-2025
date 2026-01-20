@@ -76,7 +76,7 @@ module filtered_fifo #(
       ) fifo (
           .clk       (clk),
           .rst       (rst),
-          .in_valid  (in_valid && (in_count > FIFO_COUNT_WIDTH'(adjusted_index))),
+          .in_valid  (in_transaction && (in_count > FIFO_COUNT_WIDTH'(adjusted_index))),
           .in_data   (in_data_compacted[adjusted_index]),
           .out_enable((i == next_fifo_read) && out_transaction),
           .out_valid (fifo_out_valid[i]),

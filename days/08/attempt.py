@@ -58,15 +58,24 @@ def top_m_cc_sizes(pairs, m):
         root_ids[i] = find(i)
     sizes = np.bincount(root_ids)
 
-    return np.sort(sizes)[::-1][:m]  # top m
+    top_m = np.sort(sizes)[::-1][:m]  # top m
 
+    print("Top connected component roots and sizes:")
+    for root_id in np.argsort(sizes)[::-1][:m]:
+        print(f"  Root {root_id}: size {sizes[root_id]}")
+
+        points = np.where(root_ids == root_id)[0]
+        for i, point in enumerate(points):
+            print(f"    Point {point} (idx {i})")
+
+    return top_m
 
 def solve_coords(coords, *, k=1000, m=3):
     pairs, distances = top_k_closest_pairs_l2(coords, k)
     print("top k pairs of node indices:", pairs)
     print("Top k closest pair distances:", distances)
     top_sizes = top_m_cc_sizes(pairs, m)
-    return top_sizes, int(np.prod(top_sizes))
+    return top_sizes, int(np.prod(top_sizes)), pairs, distances
 
 def load_coords():
     coords = []
@@ -80,7 +89,7 @@ def solve():
     coords = load_coords()
     k = 1000
     m = 3
-    top_sizes, product = solve_coords(coords, k=k, m=m)
+    top_sizes, product, _, _ = solve_coords(coords, k=k, m=m)
     print(f"Top {m} connected component sizes:", top_sizes)
     print("Product of top sizes:", product)
 
