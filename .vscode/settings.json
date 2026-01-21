@@ -1,3 +1,7 @@
 {
-    "nixEnvSelector.nixFile": "${workspaceFolder}/flake.nix"
+  "nixEnvSelector.nixFile": "${workspaceFolder}/flake.nix",
+  "nixEnvSelector.useFlakes": true,
+  "verilog.linting.verilator.runAtFileLocation": false,
+  "verilog.linting.verilator.arguments": "-f config/hdl.f",
+  "verilog.linting.linter": "verilator"
 }

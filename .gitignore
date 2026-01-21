@@ -4,4 +4,8 @@ __pycache__/
 
 *.so
 
+# cocotb
+sim_build/
+
+# siliconcompiler
 build/
