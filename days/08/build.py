@@ -15,9 +15,11 @@ if __name__ == "__main__":
     project.add_fileset(["rtl", "sdc"])  # enable filesets
     skywater130_demo(project)  # load a pre-defined target
 
-    # Enable SystemVerilog support with slang frontend
     # print(project.getkeys("tool", "yosys"))
+    # Enable SystemVerilog support with slang frontend
     project.set("tool", "yosys", "task", "syn_asic", "var", "use_slang", True)
+    # Disable screenshot generation, which seems to fail when headless
+    project.set("tool", "klayout", "task", "export", "var", "screenshot", False)
 
     project.option.set_remote(True)  # enable remote execution
     project.run()  # run compilation
