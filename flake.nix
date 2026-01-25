@@ -10,7 +10,7 @@
     };
 
     oxcaml-repository = {
-      url = "github:oxcaml/opam-repository";
+      url = "github:oxcaml/opam-repository/535c466c935bb7076ff517e425cd08f8b2f6a356";
       flake = false;
     };
   };
@@ -88,6 +88,14 @@
                   # fix for macOS build
                   if pkgs.stdenv.isDarwin then [ pkgs.darwin.cctools ] else [ ]
                 );
+            });
+            # oxcaml_effect was renamed to handled_effect, which breaks the hash
+            # pinning to same version in oxcaml/opam-repository but with updated hash
+            oxcaml_effect = prev.oxcaml_effect.overrideAttrs (_: {
+              src = pkgs.fetchurl {
+                url = "https://github.com/janestreet/handled_effect/archive/0216e836c8741c1fe9dd174f03c0cb384e8e0918.tar.gz";
+                sha256 = "sha256-gJHPW/Ugu4zJgPysgKMceKr3F5viHX7QDlLpa/gwH8I=";
+              };
             });
           };
 

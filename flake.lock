@@ -159,6 +159,7 @@
       "original": {
         "owner": "oxcaml",
         "repo": "opam-repository",
+        "rev": "535c466c935bb7076ff517e425cd08f8b2f6a356",
         "type": "github"
       }
     },
