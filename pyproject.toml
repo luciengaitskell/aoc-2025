@@ -4,5 +4,5 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "cocotb>=2.0.1",
-    "siliconcompiler>=0.35.4",
+    "siliconcompiler>=0.36.2",
 ]

@@ -37,9 +37,11 @@ module coord_distance #(
         sum = '0;
         for (int d = 0; d < DIMENSIONS; d++) begin
           logic signed [COORD_BIT_WIDTH:0] diff;
+          logic signed [DISTANCE_SQ_BIT_WIDTH:0] diff_expanded;
           logic [DISTANCE_SQ_BIT_WIDTH-1:0] diff_sq;
           diff = $signed({1'b0, coords[i][d]}) - $signed({1'b0, reference_point[d]});
-          diff_sq = DISTANCE_SQ_BIT_WIDTH'($unsigned((DISTANCE_SQ_BIT_WIDTH + 1)'(diff) ** 2));
+          diff_expanded = (DISTANCE_SQ_BIT_WIDTH + 1)'(diff);
+          diff_sq = DISTANCE_SQ_BIT_WIDTH'($unsigned(diff_expanded * diff_expanded));
           sum = sum + (diff_sq);
         end
         distances_sq[i] <= sum;

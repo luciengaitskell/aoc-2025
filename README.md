@@ -45,6 +45,6 @@ together and returned.
 
 
 #### Correctness
-I did not demonstrate synthesis of this design,
-but I use synthesizable structures in SystemVerilog
-and demonstrate logical correctness in my testbench.
+I was able to demonstrate synthesis of this design,
+with the default (reduced) size parameters in the top level.
+I demonstrate logical correctness in my testbench.

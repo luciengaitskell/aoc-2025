@@ -1,11 +1,11 @@
 module day08_top #(
-    parameter  int MAX_NODE_COUNT  = 2000,
+    parameter  int MAX_NODE_COUNT  = 10,
     localparam int INDEX_BIT_WIDTH = $clog2(MAX_NODE_COUNT),
-    parameter  int SORTER_ELEMENTS = 1000,
+    parameter  int SORTER_ELEMENTS = MAX_NODE_COUNT,
 
-    parameter int COORD_BIT_WIDTH = 12,
+    parameter int COORD_BIT_WIDTH = 32,
     parameter int DIMENSIONS = 3,
-    parameter int BATCH_SIZE = 16,
+    parameter int BATCH_SIZE = 2,
     parameter int TOP_N = 3,
     localparam type METADATA_TYPE = struct packed {
       logic [INDEX_BIT_WIDTH-1:0] u;

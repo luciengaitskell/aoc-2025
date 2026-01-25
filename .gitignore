@@ -6,3 +6,6 @@ __pycache__/
 
 # cocotb
 sim_build/
+
+# siliconcompiler
+build/
