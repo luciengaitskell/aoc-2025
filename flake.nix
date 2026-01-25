@@ -44,8 +44,8 @@
           projectName = "aoc2025";
           ocaml-variant = "5.2.0+ox";
           opam-repositories = [
-            oxcaml-repository
             on.opamRepository
+            oxcaml-repository
           ];
 
           # build the OCaml project scope based on the .opam file
