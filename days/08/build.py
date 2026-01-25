@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # Enable SystemVerilog support with slang frontend
     project.set("tool", "yosys", "task", "syn_asic", "var", "use_slang", True)
 
-    project.option.set_remote(True)  # enable remote execution
+    project.option.set_remote(False)  # disable remote execution
     project.run()  # run compilation
     project.summary()  # print summary
     project.show()  # show layout
