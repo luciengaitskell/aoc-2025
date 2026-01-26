@@ -4,6 +4,14 @@ __pycache__/
 
 *.so
 
+# OCaml
+_build
+*.install
+*.merlin
+_opam
+*.exe
+*.bc
+
 # cocotb
 sim_build/
 

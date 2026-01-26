@@ -1,0 +1,29 @@
+opam-version: "2.0"
+maintainer: "Luc Gaitskell"
+authors: ["Luc Gaitskell"]
+homepage: "https://github.com/luciengaitskell/aoc-2025"
+bug-reports: "https://github.com/luciengaitskell/aoc-2025/issues"
+dev-repo: "git+https://github.com/luciengaitskell/aoc-2025.git"
+doc: "https://adventofcode.com/2025"
+license: "MIT"
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+]
+depends: [
+  "ocaml" {>= "5.1.0"}
+  "dune" {>= "3.17.0"}
+  "hardcaml"
+  "hardcaml_test_harness"
+  "hardcaml_waveterm"
+  "ppx_hardcaml"
+  "core"
+  "core_unix"
+  "ppx_jane"
+  "rope"
+  "re"
+]
+available: arch != "arm32" & arch != "x86_32"
+synopsis: "Advent of Code 2025 approaches"
+description: "
+my approaches to Advent of Code 2025
+"

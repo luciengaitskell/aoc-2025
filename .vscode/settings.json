@@ -1,6 +1,9 @@
 {
   "nixEnvSelector.nixFile": "${workspaceFolder}/flake.nix",
   "nixEnvSelector.useFlakes": true,
+  "ocaml.sandbox": {
+    "kind": "global"
+  },
   "verilog.linting.verilator.runAtFileLocation": false,
   "verilog.linting.verilator.arguments": "-f config/hdl.f",
   "verilog.linting.linter": "verilator"
