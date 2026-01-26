@@ -21,7 +21,4 @@ let day01_rtl_command =
       fun () -> generate_day01_rtl ()]
 ;;
 
-let () =
-  Command_unix.run
-    (Command.group ~summary:"" [ "range-finder", day01_rtl_command ])
-;;
+let () = Command_unix.run (Command.group ~summary:"" [ "day01", day01_rtl_command ])
