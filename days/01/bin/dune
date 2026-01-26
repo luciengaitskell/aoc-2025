@@ -1,12 +1,13 @@
 (executables
  (modes byte exe)
- (names generate)
+ (names generate eval)
  (libraries
   core.command
   core_unix.command_unix
   core
   core_unix
   hardcaml
+  hardcaml_test_harness
   aoc2025_day01
   jane_rope)
  (preprocess
