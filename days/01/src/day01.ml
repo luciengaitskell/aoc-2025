@@ -25,6 +25,7 @@ end
 module O = struct
   type 'a t =
     { zero_count : 'a With_valid.t [@bits count_bits]
+    ; through_zero_count : 'a With_valid.t [@bits count_bits]
     ; current_position : 'a [@bits position_bits]
     }
   [@@deriving hardcaml]
@@ -49,22 +50,29 @@ let create
   let sm = State_machine.create (module States) spec in
   let%hw_var position = Variable.reg spec ~width:position_bits in
   let%hw_var zero_count = Variable.reg spec ~width:count_bits in
+  let%hw_var through_zero_count = Variable.reg spec ~width:count_bits in
   let count_valid = Variable.wire ~default:gnd () in
-  let truncate_position position = mux2 (position >=:. 100) (position -:. 100) position in
-  let distance_mod =
+  let truncate_position_count position count =
+    let truncated = position >=:. 100 in
+    mux2 truncated (count +:. 1) count, mux2 truncated (position -:. 100) position
+  in
+  let truncate_position position =
+    let _, position = truncate_position_count position (zero count_bits) in
+    position
+  in
+  let truncations, distance_mod =
+    let truncations = zero count_bits in
     (* mod-ish (I'm sure there's a better way to do this) *)
-    let dist_tmp0 =
-      mux2 (rotation_distance >=:. 100) (rotation_distance -:. 100) rotation_distance
-    in
-    let dist_tmp1 = truncate_position dist_tmp0 in
-    let dist_tmp2 = truncate_position dist_tmp1 in
-    let dist_tmp3 = truncate_position dist_tmp2 in
-    let dist_tmp4 = truncate_position dist_tmp3 in
-    let dist_tmp5 = truncate_position dist_tmp4 in
-    let dist_tmp6 = truncate_position dist_tmp5 in
-    let dist_tmp7 = truncate_position dist_tmp6 in
-    let dist_tmp8 = truncate_position dist_tmp7 in
-    uresize ~width:position_intermediate_bits dist_tmp8
+    let truncations, dist_tmp0 = truncate_position_count rotation_distance truncations in
+    let truncations, dist_tmp1 = truncate_position_count dist_tmp0 truncations in
+    let truncations, dist_tmp2 = truncate_position_count dist_tmp1 truncations in
+    let truncations, dist_tmp3 = truncate_position_count dist_tmp2 truncations in
+    let truncations, dist_tmp4 = truncate_position_count dist_tmp3 truncations in
+    let truncations, dist_tmp5 = truncate_position_count dist_tmp4 truncations in
+    let truncations, dist_tmp6 = truncate_position_count dist_tmp5 truncations in
+    let truncations, dist_tmp7 = truncate_position_count dist_tmp6 truncations in
+    let truncations, dist_tmp8 = truncate_position_count dist_tmp7 truncations in
+    truncations, uresize ~width:position_intermediate_bits dist_tmp8
   in
   let left_rotate_position_mod =
     let left_rotate_position =
@@ -82,6 +90,28 @@ let create
   let new_pos =
     mux2 (rotation_direction ==:. 0) left_rotate_position_mod right_rotate_position_mod
   in
+  let zero_crossings =
+    let crossings_left =
+      mux2
+        (position.value <: new_pos)
+        (of_int_trunc ~width:count_bits 1)
+        (of_int_trunc ~width:count_bits 0)
+    in
+    let crossings_right =
+      mux2
+        (new_pos <: position.value)
+        (of_int_trunc ~width:count_bits 1)
+        (of_int_trunc ~width:count_bits 0)
+    in
+    mux2
+      (position.value ==:. 0)
+      (of_int_trunc ~width:count_bits 0)
+      (mux2
+         (new_pos ==:. 0)
+         (of_int_trunc ~width:count_bits 1)
+         (mux2 (rotation_direction ==:. 0) crossings_left crossings_right))
+    +: truncations
+  in
   compile
     [ sm.switch
         [ ( Idle
@@ -89,6 +119,7 @@ let create
                 start
                 [ position <-- of_int_trunc ~width:position_bits 50
                 ; zero_count <-- zero count_bits
+                ; through_zero_count <-- zero count_bits
                 ; sm.set_next Processing
                 ]
             ] )
@@ -97,6 +128,7 @@ let create
                 rotation_valid
                 [ position <-- new_pos
                 ; when_ (new_pos ==:. 0) [ zero_count <-- zero_count.value +:. 1 ]
+                ; through_zero_count <-- through_zero_count.value +: zero_crossings
                 ]
             ; when_ finish [ sm.set_next Done ]
             ] )
@@ -104,6 +136,7 @@ let create
         ]
     ];
   { zero_count = { value = zero_count.value; valid = count_valid.value }
+  ; through_zero_count = { value = through_zero_count.value; valid = count_valid.value }
   ; current_position = position.value
   }
 ;;

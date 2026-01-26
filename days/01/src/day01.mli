@@ -21,6 +21,7 @@ end
 module O : sig
   type 'a t =
     { zero_count : 'a With_valid.t
+    ; through_zero_count : 'a With_valid.t
     ; current_position : 'a
     }
   [@@deriving hardcaml]

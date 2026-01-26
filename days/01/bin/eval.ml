@@ -24,17 +24,21 @@ let solve_day01 rotations =
       cycle ();
       incr rotation_count;
       let current_zero_count = Bits.to_unsigned_int !(outputs.Day01.O.zero_count.value) in
+      let through_zero_count =
+        Bits.to_unsigned_int !(outputs.Day01.O.through_zero_count.value)
+      in
       let pos = Bits.to_unsigned_int !(outputs.Day01.O.current_position) in
       (* Log first few rotations *)
       if !rotation_count <= 150
       then
         printf
-          "%4d: %c%-3d -> pos=%2d  zc=%d%s\n%!"
+          "%4d: %c%-3d -> pos=%2d  zc=%d tz=%d%s\n%!"
           !rotation_count
           dir
           dist
           pos
           current_zero_count
+          through_zero_count
           (if pos = 0 then " **ZERO**" else "");
       inputs.Day01.I.rotation_valid := Bits.gnd
       (* cycle () *)
@@ -61,7 +65,10 @@ let solve_day01 rotations =
     done;
     let zero_count = Bits.to_unsigned_int !(outputs.Day01.O.zero_count.value) in
     let final_position = Bits.to_unsigned_int !(outputs.Day01.O.current_position) in
-    zero_count, final_position
+    let through_zero_count =
+      Bits.to_unsigned_int !(outputs.Day01.O.through_zero_count.value)
+    in
+    zero_count, final_position, through_zero_count
   in
   Harness.run ~create:Day01.hierarchical testbench
 ;;
@@ -74,8 +81,10 @@ let solve_command =
       fun () ->
         let rotations = In_channel.read_lines input_file |> List.map ~f:parse_rotation in
         printf "Processing %d rotations...\n" (List.length rotations);
-        let zero_count, final_position = solve_day01 rotations in
-        print_s [%message "Solution" (zero_count : int) (final_position : int)]]
+        let zero_count, final_position, total_zero_count = solve_day01 rotations in
+        print_s
+          [%message
+            "Solution" (zero_count : int) (final_position : int) (total_zero_count : int)]]
 ;;
 
 let () = Command_unix.run (Command.group ~summary:"" [ "day01", solve_command ])
