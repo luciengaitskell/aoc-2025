@@ -5,7 +5,9 @@ my approaches to Advent of Code 2025
 uv run -m days.08.test_hdl_attempt
 ```
 
-### Jane Street Advent of FPGA
+## Jane Street Advent of FPGA
+
+### Day 8
 
 I built day 8 in an FPGA design with the following architecture:
 
@@ -48,3 +50,13 @@ together and returned.
 I was able to demonstrate synthesis of this design,
 with the default (reduced) size parameters in the top level.
 I demonstrate logical correctness in my testbench.
+
+### Day 1
+
+I also implemented day 1 as a demonstration of Hardcaml,
+based on the [example project](https://github.com/janestreet/hardcaml_template_project/tree/with-extensions).
+It's a straight forward implementation
+that processes one rotation per cycle,
+counting up the number of rotations that end on zero.
+For part 2, the design also counts the number of times
+zero is passed through.
