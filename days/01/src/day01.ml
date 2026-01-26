@@ -1,32 +1,31 @@
-(* An example design that takes a series of input values and calculates the range between
-   the largest and smallest one. *)
-
-(* We generally open Core and Hardcaml in any source file in a hardware project. For
-   design source files specifically, we also open Signal. *)
+(* Advent of Code 2025 - Day 1
+   based on the Hardcaml example design *)
 open! Core
 open! Hardcaml
 open! Signal
 
-let num_bits = 16
+let position_bits = Int.ceil_log2 100
+let position_intermediate_bits = Int.ceil_log2 (100 + 100)
+let distance_bits = Int.ceil_log2 1000
+let count_bits = 16
 
-(* Every hardcaml module should have an I and an O record, which define the module
-   interface. *)
 module I = struct
   type 'a t =
     { clock : 'a
     ; clear : 'a
     ; start : 'a
     ; finish : 'a
-    ; data_in : 'a [@bits num_bits]
-    ; data_in_valid : 'a
+    ; rotation_direction : 'a (* 0 = Left, 1 = Right *)
+    ; rotation_distance : 'a [@bits distance_bits]
+    ; rotation_valid : 'a
     }
   [@@deriving hardcaml]
 end
 
 module O = struct
   type 'a t =
-    { (* With_valid.t is an Interface type that contains a [valid] and a [value] field. *)
-      range : 'a With_valid.t [@bits num_bits]
+    { zero_count : 'a With_valid.t [@bits count_bits]
+    ; current_position : 'a [@bits position_bits]
     }
   [@@deriving hardcaml]
 end
@@ -34,59 +33,81 @@ end
 module States = struct
   type t =
     | Idle
-    | Accepting_inputs
+    | Processing
     | Done
   [@@deriving sexp_of, compare ~localize, enumerate]
 end
 
-let create scope ({ clock; clear; start; finish; data_in; data_in_valid } : _ I.t) : _ O.t
+let create
+  scope
+  ({ clock; clear; start; finish; rotation_direction; rotation_distance; rotation_valid } :
+    _ I.t)
+  : _ O.t
   =
   let spec = Reg_spec.create ~clock ~clear () in
   let open Always in
-  let sm =
-    (* Note that the state machine defaults to initializing to the first state *)
-    State_machine.create (module States) spec
+  let sm = State_machine.create (module States) spec in
+  let%hw_var position = Variable.reg spec ~width:position_bits in
+  let%hw_var zero_count = Variable.reg spec ~width:count_bits in
+  let count_valid = Variable.wire ~default:gnd () in
+  let truncate_position position = mux2 (position >=:. 100) (position -:. 100) position in
+  let distance_mod =
+    (* mod-ish (I'm sure there's a better way to do this) *)
+    let dist_tmp0 =
+      mux2 (rotation_distance >=:. 100) (rotation_distance -:. 100) rotation_distance
+    in
+    let dist_tmp1 = truncate_position dist_tmp0 in
+    let dist_tmp2 = truncate_position dist_tmp1 in
+    let dist_tmp3 = truncate_position dist_tmp2 in
+    let dist_tmp4 = truncate_position dist_tmp3 in
+    let dist_tmp5 = truncate_position dist_tmp4 in
+    let dist_tmp6 = truncate_position dist_tmp5 in
+    let dist_tmp7 = truncate_position dist_tmp6 in
+    let dist_tmp8 = truncate_position dist_tmp7 in
+    uresize ~width:position_intermediate_bits dist_tmp8
   in
-  (* let%hw[_var] is a shorthand that automatically applies a name to the signal, which
-     will show up in waveforms. The [_var] version is used when working with the Always
-     DSL. *)
-  let%hw_var min = Variable.reg spec ~width:num_bits in
-  let%hw_var max = Variable.reg spec ~width:num_bits in
-  (* We don't need to name the range here since it's immediately used in the module
-     output, which is automatically named when instantiating with [hierarchical] *)
-  let range = Variable.wire ~default:(zero num_bits) () in
-  let range_valid = Variable.wire ~default:gnd () in
+  let left_rotate_position_mod =
+    let left_rotate_position =
+      uresize ~width:position_intermediate_bits position.value
+      +: (of_int_trunc ~width:position_intermediate_bits 100 -: distance_mod)
+    in
+    uresize ~width:position_bits (truncate_position left_rotate_position)
+  in
+  let right_rotate_position_mod =
+    let right_rotate_position =
+      uresize ~width:position_intermediate_bits position.value +: distance_mod
+    in
+    uresize ~width:position_bits (truncate_position right_rotate_position)
+  in
+  let new_pos =
+    mux2 (rotation_direction ==:. 0) left_rotate_position_mod right_rotate_position_mod
+  in
   compile
     [ sm.switch
         [ ( Idle
           , [ when_
                 start
-                [ min <-- ones num_bits
-                ; max <-- zero num_bits
-                ; sm.set_next Accepting_inputs
+                [ position <-- of_int_trunc ~width:position_bits 50
+                ; zero_count <-- zero count_bits
+                ; sm.set_next Processing
                 ]
             ] )
-        ; ( Accepting_inputs
+        ; ( Processing
           , [ when_
-                data_in_valid
-                [ when_ (data_in <: min.value) [ min <-- data_in ]
-                ; when_ (data_in >: max.value) [ max <-- data_in ]
+                rotation_valid
+                [ position <-- new_pos
+                ; when_ (new_pos ==:. 0) [ zero_count <-- zero_count.value +:. 1 ]
                 ]
             ; when_ finish [ sm.set_next Done ]
             ] )
-        ; ( Done
-          , [ range <-- max.value -: min.value
-            ; range_valid <-- vdd
-            ; when_ finish [ sm.set_next Accepting_inputs ]
-            ] )
+        ; Done, [ count_valid <-- vdd ]
         ]
     ];
-  (* [.value] is used to get the underlying Signal.t from a Variable.t in the Always DSL. *)
-  { range = { value = range.value; valid = range_valid.value } }
+  { zero_count = { value = zero_count.value; valid = count_valid.value }
+  ; current_position = position.value
+  }
 ;;
 
-(* The [hierarchical] wrapper is used to maintain module hierarchy in the generated
-   waveforms and (optionally) the generated RTL. *)
 let hierarchical scope =
   let module Scoped = Hierarchy.In_scope (I) (O) in
   Scoped.hierarchical ~scope ~name:"day01" create
