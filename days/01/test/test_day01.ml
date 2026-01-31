@@ -85,10 +85,7 @@ let%expect_test "Simple test, optionally saving waveforms to disk" =
 
 let%expect_test "Simple test with printing waveforms directly" =
   let display_rules =
-    [ Display_rule.port_name_matches
-        ~wave_format:(Bit_or Unsigned_int)
-        (Re.Glob.glob "day01*" |> Re.compile)
-    ]
+    [ Display_rule.port_name_matches ~wave_format:(Bit_or Unsigned_int) (Glob "day01*") ]
   in
   Harness.run_advanced
     ~create:Day01.hierarchical
