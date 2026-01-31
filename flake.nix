@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     opam-nix = {
-      url = "github:luciengaitskell/opam-nix/fix/ocamlfind-patches";
+      url = "github:tweag/opam-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
